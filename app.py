@@ -57,62 +57,68 @@ if os.path.exists(data_file):
         create_data_file()
 
 # Streamlit form for login or registration
-st.title("Truck Registration and Login System")
+st.title("🚚 Truck Registration and Login System")
+st.write("Welcome to the **Truck Registration System**. You can create an account, log in, and register trucks easily!")
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.current_user = None
 
 # Sign Up and Login tabs
-tab1, tab2 = st.tabs(["Sign Up", "Login"])
+tab1, tab2 = st.tabs(["📝 Sign Up", "🔑 Login"])
 
 # Sign Up tab
 with tab1:
-    st.subheader("Register a New Account")
-    
+    st.subheader("Create a New Account")
+    st.info("Fill out the details below to register your account.")
+
     # Input fields for new user registration
-    new_username = st.text_input("Username", key="register_username")
-    new_password = st.text_input("Password", type="password", key="register_password")
+    new_username = st.text_input("👤 Username", key="register_username")
+    new_password = st.text_input("🔒 Password", type="password", key="register_password")
     
-    if st.button("Register", key="register_button"):
+    if st.button("Create Account", key="register_button"):
+        progress = st.progress(0)
         if new_username in user_data:
             st.error("Username already exists. Please choose a different username.")
         elif new_username and new_password:
+            for percent_complete in range(100):
+                progress.progress(percent_complete + 1)
             user_data[new_username] = {
                 "Password": hash_password(new_password)
             }
             pd.DataFrame.from_dict(user_data, orient='index').reset_index().rename(columns={"index": "Username"}).to_csv(user_file, index=False)
             st.session_state.logged_in = True
             st.session_state.current_user = new_username
-            st.success("Account registered successfully! You are now logged in.")
+            st.success("🎉 Account registered successfully! You are now logged in.")
         else:
             st.error("Please fill out both fields.")
 
 # Login tab
 with tab2:
-    st.subheader("Login to Your Account")
+    st.subheader("Log in to Your Account")
     
     # Input fields for user login
-    username = st.text_input("Username", key="login_username")
-    password = st.text_input("Password", type="password", key="login_password")
+    username = st.text_input("👤 Username", key="login_username")
+    password = st.text_input("🔒 Password", type="password", key="login_password")
     
     if st.button("Login", key="login_button"):
         if username in user_data and user_data[username]["Password"] == hash_password(password):
             st.session_state.logged_in = True
             st.session_state.current_user = username
-            st.success(f"Welcome, {username}!")
+            st.success(f"Welcome, {username}! 🎉")
         else:
-            st.error("Invalid username or password.")
+            st.error("Invalid username or password. ❌")
 
 # If logged in, show the truck registration form
 if st.session_state.logged_in:
-    st.subheader("Register a new truck")
-    
+    st.subheader("🚛 Register a New Truck")
+    st.write(f"Welcome, {st.session_state.current_user}! Register your truck below.")
+
     # Input fields for truck details
-    truck_number = st.text_input("Truck Number")
-    driver_name = st.text_input("Driver's Name")
-    contact_number = st.text_input("Contact Number")
-    registration_date = st.date_input("Registration Date")
+    truck_number = st.text_input("🚚 Truck Number")
+    driver_name = st.text_input("👨‍✈️ Driver's Name")
+    contact_number = st.text_input("📞 Contact Number")
+    registration_date = st.date_input("📅 Registration Date")
 
     # Button to submit the form
     if st.button("Register Truck"):
@@ -127,29 +133,29 @@ if st.session_state.logged_in:
             if truck_data:
                 truck_data_df = pd.DataFrame.from_dict(truck_data, orient='index').reset_index().rename(columns={"index": "Truck Number"})
                 truck_data_df.to_csv(data_file, index=False)
-                st.success(f"Truck {truck_number} registered successfully!")
+                st.success(f"Truck {truck_number} registered successfully! ✅")
             else:
                 st.error("Error saving truck data.")
         else:
-            st.error("Please fill out all the fields.")
+            st.error("Please fill out all the fields. 📝")
     
     # Display the registered trucks for the logged-in user
-    st.subheader(f"Registered Trucks for {st.session_state.current_user}")
+    st.subheader(f"🚛 Registered Trucks for {st.session_state.current_user}")
     user_trucks = {truck: details for truck, details in truck_data.items() if "Username" in details and details["Username"] == st.session_state.current_user}
     
     if user_trucks:
         for truck, details in user_trucks.items():
-            st.write(f"**Truck Number:** {truck}")
-            st.write(f"**Driver's Name:** {details['Driver\'s Name']}")
-            st.write(f"**Contact Number:** {details['Contact Number']}")
-            st.write(f"**Registration Date:** {details['Registration Date']}")
+            st.write(f"**🚚 Truck Number:** {truck}")
+            st.write(f"**👨‍✈️ Driver's Name:** {details['Driver\'s Name']}")
+            st.write(f"**📞 Contact Number:** {details['Contact Number']}")
+            st.write(f"**📅 Registration Date:** {details['Registration Date']}")
             st.write("---")
     else:
-        st.write("No trucks registered yet.")
+        st.write("No trucks registered yet. 📝")
 
 # Logout button
 if st.session_state.logged_in:
     if st.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.current_user = None
-        st.success("Logged out successfully!")
+        st.success("Logged out successfully! 👋")
